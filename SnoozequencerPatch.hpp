@@ -21,25 +21,18 @@ private:
     bool bdTriggers[16*4];
     bool sdTriggers[16*4];
     bool hdTriggers[16*4];
-    bool on;
     int pos;
     BassDrum* bd;
     SnareDrum* sd;
     Hat* hd;
-    int samples;
-    int samples2;
-    int lastClock;
-    int clockLength;
+    bool recording;
 
 public:
     SnoozequencerPatch() :
     sampleRate(getSampleRate()),
     blockSize(getBlockSize()),
     pos(0),
-    samples(0),
-    samples2(0),
-    clockLength(0),
-    on(false) {
+    recording(false) {
         registerParameter(PARAMETER_A, "Metronome");
 
         sinFloat = FloatArray::create(blockSize);
@@ -61,30 +54,39 @@ public:
     }
 
     void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t memes) override {
+        if (bid == BUTTON_2 && value == ON) {
+            recording = !recording;
+        }
+
         if (bid == BUTTON_1 && value == ON) {
-            on = true;
-            lastClock = samples;
-            samples = 0;
-            clockLength = lastClock / 4;
+            tick();
         }
     }
 
     void processMidi(MidiMessage msg) override {
         if (msg.isNoteOn() && msg.getNote() == 36) {
-            bdTriggers[pos] = true;
+            bd->trigger();
+
+            if (recording)
+                bdTriggers[pos] = true;
         }
 
         if (msg.isNoteOn() && msg.getNote() == 37) {
-            sdTriggers[pos] = true;
+            sd->trigger();
+
+            if (recording)
+                sdTriggers[pos] = true;
         }
 
         if (msg.isNoteOn() && msg.getNote() == 38) {
-            hdTriggers[pos] = true;
+            hd->trigger();
+
+            if (recording)
+                hdTriggers[pos] = true;
         }
     }
 
     void tick() {
-        samples2 = 0;
         pos = (pos + 1) % 64;
         if (pos % (4*4) == 0) {
             sin->setFrequency(1000);
@@ -114,11 +116,6 @@ public:
     }
 
     void processAudio(AudioBuffer &buffer) override {
-        samples += blockSize;
-        samples2 += blockSize;
-        if (on && samples2 > clockLength) {
-            tick();
-        }
         FloatArray inOutLeft = buffer.getSamples(0);
 
         sin->generate(sinFloat);

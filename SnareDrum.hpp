@@ -21,7 +21,8 @@ public:
         sine = SineOscillator::create(sr);
         noise = NoiseOscillator::create(sr);
         env = ExponentialDecayEnvelope::create(sr);
-        env->setDecay(.1);
+        env->setDecay(.2);
+        noise->setFrequency(500);
     }
 
     void trigger() {
@@ -33,7 +34,7 @@ public:
         float ev = env->generate();
         sine->setFrequency(800 * ev);
         float n = noise->generate();
-        return (sine->generate(0) * .5 + n * .5) * ev;
+        return (sine->generate(0) * .5f + n * .5f) * ev;
     }
 };
 #endif //SNOOZEQUENCER_SNAREDRUM_HPP
