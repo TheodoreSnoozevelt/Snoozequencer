@@ -1,0 +1,8 @@
+//
+// Created by theo on 1/23/22.
+//
+
+#ifndef SNOOZEQUENCER_SNAREDRUM_HPP
+#define SNOOZEQUENCER_SNAREDRUM_HPP
+
+#endif //SNOOZEQUENCER_SNAREDRUM_HPP
