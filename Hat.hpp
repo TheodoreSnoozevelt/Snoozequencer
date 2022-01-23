@@ -18,6 +18,7 @@ private:
 public:
     Hat(float sr) {
         noise = NoiseOscillator::create(sr);
+        noise->setFrequency(1000);
         env = ExponentialDecayEnvelope::create(sr);
         env->setDecay(.1);
     }
